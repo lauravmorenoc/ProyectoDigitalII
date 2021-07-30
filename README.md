@@ -36,10 +36,54 @@ La velocidad de giro de cada motor es manejada por medio de señales PWM. Estas 
 - Accionar Motores
 Para efectuar el movimiento, es importante diferenciar dos acciones que debe realizar el vehículo: el giro y el avance, pues la rotación escogida para las ruedas motorizadas del robot es diferente en cada uno de los casos. Para ello se construyó el diagrama del módulo que gestiona estas 2 acciones, además de tener el mando sobre la detención total del movimiento. Este diagrama se muestra en la figura 1.
 
-![IMG_20191109_172336](https://user-images.githubusercontent.com/42346349/127579471-25eb564b-4f89-4962-840c-3c616430f884.jpg)
 
 
 Figura 1: Diagrama de flujo de la función Accionar Motores
 
+Código fuente del módulo:
 
+```arduino
+int Accionar_motores (bool accionar, double magnitud, double Car_distance_X, double Car_angle, double Par_bef_mov, bool detener ){ //Accionar : true-avance; false-giro
+  if(detener==true){
+    Motor_Derecha(0,0,true);
+    Motor_Izquierda(0,0,true);
+    return 1;
+  }
+  if(accionar==true){//Avance
+    bool direccion=true;
+    if(magnitud<0){
+      direccion=false;
+    }
+    if((direccion==true)&&((Car_distance_X-Par_bef_mov)>magnitud)){
+      Motor_Derecha(0,0,true);
+      Motor_Izquierda(0,0,true);
+      return 1;
+      }
+    if((direccion==false)&&(Car_distance_X-Par_bef_mov<magnitud)){
+      Motor_Derecha(0,0,true);
+      Motor_Izquierda(0,0,true);
+      return 1;
+      }
+    Avance(direccion);
+    }
+   else{
+    bool direccion=true;
+    if(magnitud<0){
+      direccion=false;
+    }
+    if((direccion==true)&&((Car_angle-Par_bef_mov)>magnitud)){
+      Motor_Derecha(0,0,true);
+      Motor_Izquierda(0,0,true);
+      return 1;
+      }
+    if((direccion==false)&&((Car_angle-Par_bef_mov)<magnitud)){
+      Motor_Derecha(0,0,true);
+      Motor_Izquierda(0,0,true);
+      return 1;
+      }
+    Giro(direccion); 
+    }
+   return 0;
+  } 
+```
 
