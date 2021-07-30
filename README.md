@@ -35,6 +35,7 @@ La velocidad de giro de cada motor es manejada por medio de señales PWM. Estas 
 
 #### Motores
 - Accionar Motores
+
 Para efectuar el movimiento, es importante diferenciar dos acciones que debe realizar el vehículo: el giro y el avance, pues la rotación escogida para las ruedas motorizadas del robot es diferente en cada uno de los casos. Para ello se construyó el diagrama del módulo que gestiona estas 2 acciones, además de tener el mando sobre la detención total del movimiento. Este diagrama se muestra en la figura 1.
 
 
@@ -89,6 +90,7 @@ int Accionar_motores (bool accionar, double magnitud, double Car_distance_X, dou
 ```
 
 - Giro
+
 Es el encargado de enviar el comando de giro a las ruedas. Para ello toma la variable dirección y a partir de ella asigna el sentido de giro de cada rueda para lograr la acción de giro deseada. Si la dirección de movimiento es positiva, se pretende girar en sentido de las manecillas del reloj y para ello la llanta izquierda deberá avanzar adelante y la llanta derecha deberá ir hacia atrás. Si la dirección es negativa, las llantas y el giro se orientarán de manera contraria a la mencionada anteriormente. A continuación, se muestra el diagrama de bloques y el código fuente del módulo.
 
 Figura 2:  Diagrama de flujo de la función Giro
@@ -119,6 +121,7 @@ void Giro(bool direccion){
   }
 ```
 - Avance
+
 Genera el llamado a los módulos de las ruedas para el avance dependiendo de la dirección de este. Si la dirección es positiva, se realiza una asignación de avance a ambas ruedas, y si la dirección es negativa, se genera una asignación de retroceso.
 
 Figura 3: Diagrama de flujo de la función Avance
@@ -150,6 +153,7 @@ void Avance(bool direccion){
 ```
 
 - Motor_Derecha
+
 Este módulo es el encargado final de asignar los pulsos PWM al motor de la llanta derecha.
 
 Figura 4: Diagrama de flujo de la función Motor_Derecha
@@ -171,6 +175,7 @@ void Motor_Derecha(int PWM_Motor_1_Adel, int PWM_Motor_1_Atras, bool Detener) {
 ```
 
 - Motor_Izquierda
+
 Este módulo tiene una similitud alta con el módulo anterior, asignando al motor izquierdo la tasa de PWM que debe tener para el movimiento correcto según la dirección que ha sido ordenado por algún módulo de mayor jerarquía.
 
 Figura 5: Diagrama de flujo de la función Motor_Izquierda
@@ -192,3 +197,69 @@ void Motor_Izquierda(int PWM_Motor_2_Adel, int PWM_Motor_2_Atras, bool Detener) 
 ```
 
 #### Encoders
+
+Son los sensores encargados de registrar el giro de las llantas para conocer la distancia que ha recorrido el robot, a partir de un modelo cinemático que fue construido a partir de las condiciones particulares del vehículo, pero que no será mostrado en el presente documento por su extensión. La información proveniente de los encoders es usada y procesada en un módulo llamado “Odometría”. Cada 40 cambios de pulso de los encoders se genera una vuelta completa de la llanta, cantidad que se va acumulando para ver la cantidad de vueltas que cada llanta ha dado y calcular su velocidad angular. Con la velocidad angular de cada llanta y el modelo cinemático construido se puede obtener la velocidad del robot en sus componentes lineal y angular. Realizando una integración de las anteriores velocidades puede tenerse la información de la posición del robot (Variables Car_Distance_X y Car_Angle), en coordenadas polares. Este módulo debe ser actualizado la mayor cantidad de veces posibles, puesto que cómo se mencionó debe observar el cambio en la señal de los encoders lo cual puede suceder muy rápido, generando así errores de medición.
+
+Figura 6:  Diagrama de flujo de la función de Odometría
+
+```cp
+void Odometria (unsigned long tiempoInicial){
+    Encoder_Der = digitalRead(2);
+    Encoder_Izq = digitalRead(3);
+  if (Encoder_Izq != ranura_Ant_Izq) {
+   ranura_Ant_Izq = Encoder_Izq;
+   ranura_Izq = ranura_Izq + 1;
+   vueltas_Izq = ranura_Izq / Total_ran;
+  }
+  if (vueltas_Izq != turnstate_Izq) {
+    turnstate_Izq = vueltas_Izq;
+  }
+
+  if (Encoder_Der != ranura_Ant_Der) {
+    ranura_Ant_Der = Encoder_Der;
+    ranura_Der = ranura_Der + 1;
+    vueltas_Der = ranura_Der / Total_ran;
+  }
+  if (vueltas_Der != turnstate_Der) {
+    turnstate_Der = vueltas_Der;
+  }
+
+  if (i == 0) {
+    tiempoActual = micros() - tiempoInicial;
+    i=i+1;
+  } else {
+    tiempoActual = micros() - tiempoAnterior;
+  }
+  tiempoAnterior = micros();
+
+  W_Izq = (vueltas_Izq - vueltas_Izq_Ant) * 2 * 3.1416 / (tiempoActual * 0.000001); //Velocidad en rad/s
+  W_Der = (vueltas_Der - vueltas_Der_Ant) * 2 * 3.1416 / (tiempoActual * 0.000001); //Velocidad en rad/s
+
+  if (Direccion_Motor_1 == false) {
+    W_Der = -W_Der;
+  }
+  if (Direccion_Motor_2 == false) {
+    W_Izq = -W_Izq;
+  }
+
+  Car_Velocity = (Wheels_diameter * W_Izq + Wheels_diameter * W_Der) / 2; //Velocidad del robot en x [m/s]
+  Car_W_angle = (-Wheels_diameter * W_Izq + Wheels_diameter * W_Der) / ( Wheels_perimeter); //Velocidad de rotación del robot en sentido contrario a manecillas [rad/s]
+
+  Car_distance_X = Car_distance_X + Car_Velocity * tiempoActual * 0.000001; //[m]
+  Car_angle = Car_angle + Car_W_angle * tiempoActual * 0.000001; //[rad]
+
+  vueltas_Der_Ant = vueltas_Der;
+  vueltas_Izq_Ant = vueltas_Izq;
+  return 0;
+}
+```
+
+#### Sensores ultrasonido
+Son dispositivos encargados de generar una onda acústica que viaja desde el dispositivo con una dirección especifica y, que al encontrar un obstáculo, se reflejan en forma de eco y son captadas al regresar por el recibidor del dispositivo, que genera una señal eléctrica en respuesta. Dado que conocemos la velocidad a la que viajan las ondas sonoras en el aire (340 m/s aproximadamente), podemos obtener una medida indirecta de la distancia a la cual se encuentra el objeto del sensor contabilizando el tiempo que tarda el sensor en recibir la señal de eco desde el objeto. En esta ocasión, se han dispuesto dos sensores de referencia HC-SR04, uno al frente de forma que el explorador pueda detenerse antes de chocar con un obstáculo frontal, y uno a su izquierda de forma que la distancia lateral le permite reorientar su movimiento, es decir, si se aleja de la pared lateral por encima de un límite establecido, el explorador deberá orientarse levemente hacia su izquierda pues esto indica que se está alejando y no se mueve en la dirección del camino que debe seguir. Análogamente, si se acerca a la pared lateral por encima de un segundo límite establecido, el explorador deberá reorientarse levemente hacia la derecha pues su movimiento no es paralelo a la trayectoria deseada.
+
+![image](https://user-images.githubusercontent.com/42346349/127583296-5b63e354-d69a-4f8a-88c3-2bfdf84ceba7.png)
+
+Los pines Vcc y GND son los encargados de la alimentación del sensor, que funciona correctamente con 5 voltios, por lo cual pueden ser conectados a la salida de 5 V de la tarjeta Arduino UNO. 
+
+El pin trig es el encargado de activar la señal acústica, y la detección del su eco se hace por medio de la lectura del pin Echo, que permanece prendido desde que se envía la onda acústica hasta que es detectada por el receptor. Suponiendo que la velocidad con la que el explorador se acerca al obstáculo es mucho menor que la velocidad del sonido, lo cual es cierto en nuestro caso, el tiempo en el que la onda tarda en llegar desde el sensor hasta el obstáculo será la mitad del tiempo detectado, y la distancia a la que se encuentra será este tiempo multiplicado por la velocidad del sonido especificada anteriormente.
+
