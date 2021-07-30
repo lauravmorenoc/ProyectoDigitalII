@@ -42,7 +42,7 @@ Figura 1: Diagrama de flujo de la función Accionar Motores
 
 Código fuente del módulo:
 
-```arduino
+```cpp
 int Accionar_motores (bool accionar, double magnitud, double Car_distance_X, double Car_angle, double Par_bef_mov, bool detener ){ //Accionar : true-avance; false-giro
   if(detener==true){
     Motor_Derecha(0,0,true);
