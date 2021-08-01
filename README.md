@@ -281,6 +281,35 @@ Son dispositivos encargados de generar una onda acústica que viaja desde el dis
 Los pines Vcc y GND son los encargados de la alimentación del sensor, que funciona correctamente con 5 voltios, por lo cual pueden ser conectados a la salida de 5 V de la tarjeta Arduino UNO. 
 
 El pin trig es el encargado de activar la señal acústica, y la detección del su eco se hace por medio de la lectura del pin Echo, que permanece prendido desde que se envía la onda acústica hasta que es detectada por el receptor. Suponiendo que la velocidad con la que el explorador se acerca al obstáculo es mucho menor que la velocidad del sonido, lo cual es cierto en nuestro caso, el tiempo en el que la onda tarda en llegar desde el sensor hasta el obstáculo será la mitad del tiempo detectado, y la distancia a la que se encuentra será este tiempo multiplicado por la velocidad del sonido especificada anteriormente.
+#### Servomotor
+Los servomotores etulizan un sistema de control preciso de una posición angular y lineal, esto se consigue usando la posicion actual del aspa. Se eleigieron este tipo de sensores ya que el entorno de desarrollo integrado (IDE) de Arduino, el nombre de dicho modulo es el servomotor SG90.
+La librería en Arduino que permite el manejo del servomotor es la librería Servo.h, de la cual se usó la función write(), que tiene como argumento el ángulo en grados que debe recorrer el aspa desde su posición actual.
+Para nuestro proyecto el servo debe permitirlw al explorador realizar un movimiento giratorio de la cámara de modo que pueda tomar imagenes a cada lado del explorador, con el fin de detectar las "minas" ubicadas en las paredes del laberinto. El tiempo establecido para capatar la imagen es de 2s; dado que el movimiento del servo es un poco brusco, se realizó una función que suavisa este movimiento dandole indicaciones de moverse un grado cada 5 milisegundos, para que se mueva un total de 180 grados, se tome la pimera imagen, y luego vuelva a recorrer esta misma distancia angular hasta volver a su posición inicial, para tomar la segunda imagen. El código utilizado se muestra a continuación.
+
+```cpp
+void moveRadar(){
+  int dataFPGA1=0;
+  int dataFPGA2=0;
+  for(angle=0; angle<180; angle++){
+  
+  servo.write(angle);
+  delay(5);
+  if(angle==179){
+    delay(2000); // Delay de tomar la foto (puede aumentar)
+  }
+}
+  
+
+for(angle=180; angle>0; angle--){
+  servo.write(angle);
+  delay(5);
+  if(angle==1){
+    delay(2000); // Delay de tomar la foto (puede aumentar)
+  }
+  }
+
+}
+```
 
 ### Periféricos: sistema de cámara
 #### Cámara
