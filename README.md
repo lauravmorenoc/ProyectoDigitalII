@@ -5,7 +5,7 @@ El proyecto consiste en el diseño de un sistema capaz de recorrer un laberinto,
 Para la realización de este proyecto se usaron los siguientes implementos:
 - Tarjeta Arduino UNO
 - Tarjeta FPGA Altera EP4CE6E22C8N
-- Montura con bases de acrílico, 2 llantas fijas y 2 llantas movibles.
+- Montura con bases de acrílico, 2 ruedas fijas y 2 ruedas tipo castor.
 - 2 motores DC.
 - 2 encoders ref. HC-020K
 - 2 sensores ultrasonid ref. HC-SR04.
@@ -596,3 +596,6 @@ Para trabajos futuros con esta cámara se sugiere realizar un estudio de los reg
 De otro lado también se contruyó una App en Appinventor, que a través de datos obtenidos por bluetooth lograba dibujar la trayectoria del explorador, para ello contaba principalmente con tres "módulos" bien definidos, uno que realizaba la obtención de datos en la App (Cómo dato curioso, AppInventor solo tomaba el dato correctamente sí se obtenía cómo texto, No cómo nnúmero de 1, 2 o 4 bits, para pasar dicho texto a número para usarlo luego, se dividió la variable de texto entre 1 y se asignó a una variable numérica), otro decodificaba esta información (Para enviar datos se usó un byte en el cual se codificaba la información de una manera específica, para ver más, observar el punto 5 de la documentación) y finalmente un módulo que tomaba los datos decodificados, y realizaba el dibujo de la trayectoria del robot. A continuación se muestra un diagrama sencillo del funcionamiento de la App.
 
 XXXXXXX Diagrama de funcionamiento de la App
+
+## Unión de sistemas y resultado final
+Posteior a la realización de cada uno de los sistemas se procedió a realizar la integración de estos, dentro del Soc está el sistema de la cámara y el de movimiento, estos 2 sistemas se comunican por medio de las señales arduinoSignal (Señal que indica a la FPGA el momento en el cual el sistema de movimiento requiere el color del frame) y datoAPP (Señal a través de la cual la FPGA, por protocolo UART envía la información del frame detectado, color y "figura") y, el SoC se comunica con un sistema externo, el de Mapeo y envío, envío, nuestro SoC se comunica con este sistema a parir de la señal datoAPP, que es enviada por el sistema de movimiento a partir de protocolo UART por bluetooth, donde el sistema de mapeo y envío obtiene el dato enviado y realiza el dibujo de la trayectoria del explorador. A continuación puede verse un diagrama general de todos los sistemas de nuestro explorador, junto con los periféricos con los cuales cuenta.
