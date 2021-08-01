@@ -1,9 +1,9 @@
 # Proyecto de la materia Electrónica Digital II: Explorador de un laberinto.
 
-## Johan Higuera (jhiguera@unal.edu.co)
-## Laura Moreno (lamorenoca@unal.edu.co)
-## Ana Espinosa (aespinosaj@unal.edu.co)
-## Daniel Maldonado (dfmaldonadob@unal.edu.co)
+### Johan Higuera (jhiguera@unal.edu.co)
+### Laura Moreno (lamorenoca@unal.edu.co)
+### Ana Espinosa (aespinosaj@unal.edu.co)
+### Daniel Maldonado (dfmaldonadob@unal.edu.co)
 
 
 El proyecto consiste en el diseño de un sistema capaz de recorrer un laberinto, enviar información de su trayectoria a un dispositivo en el cual se puede visualizar, y captar información del color de las paredes de su entorno, que también debe visualizarse junto a la trayectoria.
