@@ -581,3 +581,7 @@ Es de mencionar que el código fué diseñado para obtener el color del frame, s
 
 Para trabajos futuros con esta cámara se sugiere realizar un estudio de los registros de configuración de la cámara y en especial aquellos que realizan control del color, puesto que talvez con ayuda de esto se logre obtener una mejor imágen, más clara y que permita ver correctamente el exterior.
 
+### Periféricos: sistema de mapeo y envío
+De otro lado también se contruyó una App en Appinventor, que a través de datos obtenidos por bluetooth lograba dibujar la trayectoria del explorador, para ello contaba principalmente con tres "módulos" bien definidos, uno que realizaba la obtención de datos en la App (Cómo dato curioso, AppInventor solo tomaba el dato correctamente sí se obtenía cómo texto, No cómo nnúmero de 1, 2 o 4 bits, para pasar dicho texto a número para usarlo luego, se dividió la variable de texto entre 1 y se asignó a una variable numérica), otro decodificaba esta información (Para enviar datos se usó un byte en el cual se codificaba la información de una manera específica, para ver más, observar el punto 5 de la documentación) y finalmente un módulo que tomaba los datos decodificados, y realizaba el dibujo de la trayectoria del robot. A continuación se muestra un diagrama sencillo del funcionamiento de la App.
+
+XXXXXXX Diagrama de funcionamiento de la App
