@@ -38,7 +38,7 @@ La velocidad de giro de cada motor es manejada por medio de señales PWM. Estas 
 
 Para efectuar el movimiento, es importante diferenciar dos acciones que debe realizar el vehículo: el giro y el avance, pues la rotación escogida para las ruedas motorizadas del robot es diferente en cada uno de los casos. Para ello se construyó el diagrama del módulo que gestiona estas 2 acciones, además de tener el mando sobre la detención total del movimiento. Este diagrama se muestra en la figura 1.
 
-
+![DiagramaJohan](https://user-images.githubusercontent.com/42346349/127759413-13e373c7-3690-4ee8-923e-aaee70407e53.jpeg)
 
 Figura 1: Diagrama de flujo de la función Accionar Motores
 
@@ -124,6 +124,8 @@ void Giro(bool direccion){
 
 Genera el llamado a los módulos de las ruedas para el avance dependiendo de la dirección de este. Si la dirección es positiva, se realiza una asignación de avance a ambas ruedas, y si la dirección es negativa, se genera una asignación de retroceso.
 
+![DiagramaJohan(1)](https://user-images.githubusercontent.com/42346349/127759420-d80c814e-39df-4e4d-a795-8b12b2341645.jpeg)
+
 Figura 3: Diagrama de flujo de la función Avance
 
 ```cpp
@@ -155,6 +157,8 @@ void Avance(bool direccion){
 - Motor_Derecha
 
 Este módulo es el encargado final de asignar los pulsos PWM al motor de la llanta derecha.
+
+![DiagramaJohan(2)](https://user-images.githubusercontent.com/42346349/127759425-7f002fc8-5584-4f66-a802-be8492b84133.jpeg)
 
 Figura 4: Diagrama de flujo de la función Motor_Derecha
 
@@ -200,9 +204,11 @@ void Motor_Izquierda(int PWM_Motor_2_Adel, int PWM_Motor_2_Atras, bool Detener) 
 
 Son los sensores encargados de registrar el giro de las llantas para conocer la distancia que ha recorrido el robot, a partir de un modelo cinemático que fue construido a partir de las condiciones particulares del vehículo, pero que no será mostrado en el presente documento por su extensión. La información proveniente de los encoders es usada y procesada en un módulo llamado “Odometría”. Cada 40 cambios de pulso de los encoders se genera una vuelta completa de la llanta, cantidad que se va acumulando para ver la cantidad de vueltas que cada llanta ha dado y calcular su velocidad angular. Con la velocidad angular de cada llanta y el modelo cinemático construido se puede obtener la velocidad del robot en sus componentes lineal y angular. Realizando una integración de las anteriores velocidades puede tenerse la información de la posición del robot (Variables Car_Distance_X y Car_Angle), en coordenadas polares. Este módulo debe ser actualizado la mayor cantidad de veces posibles, puesto que cómo se mencionó debe observar el cambio en la señal de los encoders lo cual puede suceder muy rápido, generando así errores de medición.
 
+![DiagramaJohan(3)](https://user-images.githubusercontent.com/42346349/127759489-941f1c7e-7545-42e7-a5cc-d149e21333ed.jpeg)
+
 Figura 6:  Diagrama de flujo de la función de Odometría
 
-```cp
+```cpp
 void Odometria (unsigned long tiempoInicial){
     Encoder_Der = digitalRead(2);
     Encoder_Izq = digitalRead(3);
@@ -263,18 +269,18 @@ Los pines Vcc y GND son los encargados de la alimentación del sensor, que funci
 
 El pin trig es el encargado de activar la señal acústica, y la detección del su eco se hace por medio de la lectura del pin Echo, que permanece prendido desde que se envía la onda acústica hasta que es detectada por el receptor. Suponiendo que la velocidad con la que el explorador se acerca al obstáculo es mucho menor que la velocidad del sonido, lo cual es cierto en nuestro caso, el tiempo en el que la onda tarda en llegar desde el sensor hasta el obstáculo será la mitad del tiempo detectado, y la distancia a la que se encuentra será este tiempo multiplicado por la velocidad del sonido especificada anteriormente.
 
-
 ### Periféricos: sistema de cámara
-El único périferico de este sistema es la cámara en sí, para este periférico inicialmente se realizó la configuración de dicho periférico, con ayuda del protocolo I2C y el código de Muhammad Yaseen, que se puede encontrar en https://gist.github.com/muhammadyaseen/75490348a4644dcbc70f, este código envía a una dirección de registro de la cámara el valor que se desea colocar en este, un ejemplo sencillo de modificación de registros de la cámara es:
-```cp
+#### Cámara
+Inicialmente se realizó la configuración de este periférico, con ayuda del protocolo SCCB y el código de Muhammad Yaseen para realizar la configuración desde Arduino, disponible en el link https://gist.github.com/muhammadyaseen/75490348a4644dcbc70f. Este código envía a una dirección de registro de la cámara el valor que se desea colocar en este, un ejemplo sencillo de modificación de registros de la cámara es:
+```cpp
 WriteOV7670(0x12, 0x80);
 ```
-En el anterior trozo de código se modifica el registro con dirección hexagésimal 12, y se le asigna el valor hexagésimal 80.
+En el anterior trozo de código se modifica el registro con dirección hexadecimal 12, y se le asigna el valor hexadecimal 80.
 La úbicación del llamado a esta función dentro del código de configuración de cámara es dentro de la función "set_cam_RGB565_QCIF()".
 
-La cámara se configuró para que envíara con una resolución de 64x48 píxeles, a 1 frame por segundo (fps), con codifcación RGB555, a continuación se muestra la función set_cam_RGB565_QCIF() con los registros modificados allí.
+La cámara se configuró para que adquiriera una resolución de 64x48 píxeles, a 1 frame por segundo (fps), con codifcación RGB555. A continuación se muestra la función set_cam_RGB565_QCIF() con los registros modificados allí.
 
-```cp
+```cpp
  WriteOV7670(0x12, 0x80); //reset
  
  WriteOV7670(0x12, 0x04); //COM07 Cambiado
@@ -289,13 +295,16 @@ La cámara se configuró para que envíara con una resolución de 64x48 píxeles
  WriteOV7670(0xA2, 0x10); //SCALING_PCLK_DELAY: Cambiado
 ```
 
-Posterior a la realización de la configuración de la cámara se realizó el código para obtener datos de esta cámara, se realizaron dos módulos principales que realizaban la obtención de cada píxel y el calculo del color del frame, a continuación se explicarán dichos módulos:
+Posterior a la realización de la configuración de la cámara se realizó el código para obtener los datos. Se realizaron dos módulos principales que realizaban la obtención de cada píxel y el calculo del color del frame. La explicación de cada módulo se explica a continuación. 
+
 #### pixel_catcher:
-Este modulo se encarga de obtener el píxel, dado que se escogío una codificación de píxel RGB555, el píxel se envía en dos ciclos del PCLK, así pues este módulo se encarga de verificar todas las condiciones para obtener un píxel y además de ello, con ayuda de sú máquina de estados interna, obtiene el píxel completo (Durante 2 ciclos del PCLK obtiene el píxel completo) y autoriza al módulo color_finder a realizar sú labor. A continuación puede verse el diagrama de flujo de funcionamiento de dicho módulo y posteriormente el código con el cual fué implementado.
+Este modulo se encarga de obtener la información de cada pixel. Dado que se escogió una codificación de pixel RGB555, el píxel completo se envía en dos ciclos del PCLK, así pues este módulo se encarga de verificar todas las condiciones para obtener un píxel y además de ello, con ayuda de su máquina de estados interna, obtiene el pixel completo y autoriza al módulo color_finder a realizar sú labor. A continuación puede verse el diagrama de flujo de funcionamiento de dicho módulo y posteriormente el código con el cual fué implementado.
 
-XXXXXXXX Diagrama de flujo de funcionamiento del módulo píxel catcher
+![pixel_catcher](https://user-images.githubusercontent.com/42346349/127759736-659c2da3-d546-43a5-b53f-317a892bdd65.jpeg)
 
-```cp
+Figra XXXXXXXX: Diagrama de flujo de funcionamiento del módulo píxel catcher
+
+```verilog
 module pixel_catcher(
   input rst, pclk, vsync, href,
   input [7:0]cam_data,
@@ -438,9 +447,11 @@ endmodule
 Este módulo, cuando obtiene la autorización para funcionar por parte del pixel_catcher, toma el píxel tomado anteriormente y lo reduce de RGB555 a RGB111, para ello toma el bit más significativo de cada componente R, G ó B y lo asigna al nuevo píxel con resuloción RGB111, luego, se puede verificar cual es el color del píxel (Existen 8 posbilidades, para 8 colores escogidos) y se tienen registros a los cuales se les aumenta en una unidad cuando se detecta que el color corresponde al identificador del registro. Al finalizar el frame se realiza una comparación de todos los registros para ver cual es el mayor y este se toma cómo el color del frame y se muestra en la señal color_code.
 A continuación se muestra el diagrama de flujo de este módulo y el código de verilog con el cual se implementó.
 
-XXXXXXXXX Diagrama de flujo del módulo color_finder
+![color_finder](https://user-images.githubusercontent.com/42346349/127759766-b5584411-7fb8-4931-b7e8-15e18124fa94.jpeg)
 
-```cp
+Figura XXXXXXXXX: Diagrama de flujo del módulo color_finder
+
+```verilog
 module color_finder(input [14:0]pixel_data,
        input clk,read_color, rst,
        output reg [2:0]color_code=3'b111,
