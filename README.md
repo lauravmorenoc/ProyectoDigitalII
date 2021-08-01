@@ -263,3 +263,321 @@ Los pines Vcc y GND son los encargados de la alimentación del sensor, que funci
 
 El pin trig es el encargado de activar la señal acústica, y la detección del su eco se hace por medio de la lectura del pin Echo, que permanece prendido desde que se envía la onda acústica hasta que es detectada por el receptor. Suponiendo que la velocidad con la que el explorador se acerca al obstáculo es mucho menor que la velocidad del sonido, lo cual es cierto en nuestro caso, el tiempo en el que la onda tarda en llegar desde el sensor hasta el obstáculo será la mitad del tiempo detectado, y la distancia a la que se encuentra será este tiempo multiplicado por la velocidad del sonido especificada anteriormente.
 
+
+### Periféricos: sistema de cámara
+El único périferico de este sistema es la cámara en sí, para este periférico inicialmente se realizó la configuración de dicho periférico, con ayuda del protocolo I2C y el código de Muhammad Yaseen, que se puede encontrar en https://gist.github.com/muhammadyaseen/75490348a4644dcbc70f, este código envía a una dirección de registro de la cámara el valor que se desea colocar en este, un ejemplo sencillo de modificación de registros de la cámara es:
+```cp
+WriteOV7670(0x12, 0x80);
+```
+En el anterior trozo de código se modifica el registro con dirección hexagésimal 12, y se le asigna el valor hexagésimal 80.
+La úbicación del llamado a esta función dentro del código de configuración de cámara es dentro de la función "set_cam_RGB565_QCIF()".
+
+La cámara se configuró para que envíara con una resolución de 64x48 píxeles, a 1 frame por segundo (fps), con codifcación RGB555, a continuación se muestra la función set_cam_RGB565_QCIF() con los registros modificados allí.
+
+```cp
+ WriteOV7670(0x12, 0x80); //reset
+ 
+ WriteOV7670(0x12, 0x04); //COM07 Cambiado
+ WriteOV7670(0x40, 0xF0); //COM15: Set RGB 555
+ WriteOV7670(0x11, 0x1F);// CLKR Cambiado para 2fps
+ WriteOV7670(0x0C, 0x08); //COM3: Enable Scaler
+ WriteOV7670(0x3E, 0x08); //COM14: Cambiado para manual scaling
+ WriteOV7670(0x70, 0x28); //SCALING_XSC: Cambiado
+ WriteOV7670(0x71, 0x28); //SCALING_YSC: Cambiado
+ WriteOV7670(0x72, 0x33); //SCALING_DCWCTR: Cambiado por down sampling 
+ WriteOV7670(0x73, 0x03); //SCALING_PCLK_DIV: Cambiado
+ WriteOV7670(0xA2, 0x10); //SCALING_PCLK_DELAY: Cambiado
+```
+
+Posterior a la realización de la configuración de la cámara se realizó el código para obtener datos de esta cámara, se realizaron dos módulos principales que realizaban la obtención de cada píxel y el calculo del color del frame, a continuación se explicarán dichos módulos:
+#### pixel_catcher:
+Este modulo se encarga de obtener el píxel, dado que se escogío una codificación de píxel RGB555, el píxel se envía en dos ciclos del PCLK, así pues este módulo se encarga de verificar todas las condiciones para obtener un píxel y además de ello, con ayuda de sú máquina de estados interna, obtiene el píxel completo (Durante 2 ciclos del PCLK obtiene el píxel completo) y autoriza al módulo color_finder a realizar sú labor. A continuación puede verse el diagrama de flujo de funcionamiento de dicho módulo y posteriormente el código con el cual fué implementado.
+
+XXXXXXXX Diagrama de flujo de funcionamiento del módulo píxel catcher
+
+```cp
+module pixel_catcher(
+  input rst, pclk, vsync, href,
+  input [7:0]cam_data,
+  output reg read_color, reset_color,
+  output reg [14:0] pixel_data,
+  output reg begin_frame,
+  output reg image_select,
+  output [12:0]addr_in);
+  
+  reg last_vsync_state;
+  reg [6:0] pixel_data_aux;
+  reg [1:0]state;
+  reg [12:0]addr_cnt;
+  
+  assign addr_in = addr_cnt + (13'd3072 & {13{image_select}});
+  
+  parameter BEGIN=0, CATCH_FIRST_BYTE=2'd1, CATCH_SECOND_BYTE=2'd2;
+  
+  always @ (posedge (pclk)) 
+    begin 
+     if(rst) begin 
+       state=BEGIN;
+       last_vsync_state=0;
+       pixel_data_aux=7'd0;
+       pixel_data=15'b0;
+		 reset_color=1'b1;
+       read_color=1'b0;
+		 image_select<=0;
+		 begin_frame=1'b0;
+     end 
+     else
+       begin 
+         case(state)
+           BEGIN:
+             begin 
+               pixel_data_aux=7'd0;
+               pixel_data=15'b0;
+               read_color=1'b0;
+					reset_color=0;
+					image_select<=image_select;
+               if((~vsync)&last_vsync_state) state= CATCH_FIRST_BYTE; 
+               else
+				     begin	
+					    state=BEGIN;
+						 if(vsync)begin_frame=1'b1; 
+						 if(vsync&(~last_vsync_state))
+						   begin
+						   	image_select<=~image_select; // NEW
+								addr_cnt=13'b0;
+								begin_frame=1'b1;
+							end
+					  end
+               last_vsync_state=vsync;
+             end 
+           
+           CATCH_FIRST_BYTE:
+             begin 
+               if((~vsync)&&href)
+                 begin 
+					    begin_frame=1'b0;
+                   pixel_data_aux=cam_data[6:0];
+                   pixel_data<=pixel_data;
+                   read_color=1'b0;
+						 addr_cnt=addr_cnt+1'b1;
+						 reset_color=0;
+                   state=CATCH_SECOND_BYTE;
+						 last_vsync_state=vsync;
+						 image_select<=image_select;
+                 end 
+               else 
+                 begin 
+                   if(vsync)
+                     begin 
+							  begin_frame=1'b1;
+                       reset_color=1'b1;
+                       state=BEGIN;
+                       read_color=1'b0;
+							  if(~last_vsync_state)
+						       begin
+						   	   image_select<=~image_select; // NEW
+								   addr_cnt=13'b0;
+							    end
+							  last_vsync_state=vsync;
+                     end 
+                   else
+						   begin
+							  begin_frame=1'b0;
+						     state=CATCH_FIRST_BYTE;
+							  last_vsync_state=vsync;
+							  image_select<=image_select;
+						   end
+                 end 
+             end 
+           CATCH_SECOND_BYTE:
+             begin 
+               if((~vsync)&&href) 
+                 begin 
+					    begin_frame=1'b0;
+					    reset_color=0;
+                   pixel_data={pixel_data_aux, cam_data};
+                   last_vsync_state=vsync;
+                   read_color=1'b1;
+						 image_select<=image_select;
+                   state=CATCH_FIRST_BYTE;
+                 end 
+               else
+                 begin 
+                   if(vsync)
+                     begin 
+							  begin_frame=1'b1;
+                       reset_color=1;
+                       state=BEGIN;
+                       read_color=1'b0;
+							  if(~last_vsync_state)
+						       begin
+						   	   image_select<=~image_select; // NEW
+								   addr_cnt=13'b0;
+							    end
+							  last_vsync_state=vsync;
+                     end 
+                   else
+						 begin
+						   begin_frame=1'b0;
+						   state=CATCH_FIRST_BYTE;
+							reset_color<=0;
+							read_color<=0;
+							image_select<=image_select;
+							last_vsync_state=vsync;
+						 end
+                 end 
+             end 
+		   endcase
+     end 
+    end 
+  
+endmodule 
+```
+
+#### color_finder:
+Este módulo, cuando obtiene la autorización para funcionar por parte del pixel_catcher, toma el píxel tomado anteriormente y lo reduce de RGB555 a RGB111, para ello toma el bit más significativo de cada componente R, G ó B y lo asigna al nuevo píxel con resuloción RGB111, luego, se puede verificar cual es el color del píxel (Existen 8 posbilidades, para 8 colores escogidos) y se tienen registros a los cuales se les aumenta en una unidad cuando se detecta que el color corresponde al identificador del registro. Al finalizar el frame se realiza una comparación de todos los registros para ver cual es el mayor y este se toma cómo el color del frame y se muestra en la señal color_code.
+A continuación se muestra el diagrama de flujo de este módulo y el código de verilog con el cual se implementó.
+
+XXXXXXXXX Diagrama de flujo del módulo color_finder
+
+```cp
+module color_finder(input [14:0]pixel_data,
+       input clk,read_color, rst,
+       output reg [2:0]color_code=3'b111,
+		 output reg regwrite,
+		 output reg [14:0]RAM_data);
+  
+  parameter BEGIN=0, READ_RGB=2'd1, CHOOSE_COLOR=2'd2, WAIT=2'd3;
+  parameter BLACK=3'b000, BLUE=3'b001, GREEN=3'b010, CYAN=3'b011, RED=3'b100, VIOLET=3'b101, YELLOW=3'b110, WHITE=3'b111;
+  
+  reg [14:0] black,blue,green,cyan,red,violet,yellow,white;
+  reg [1:0]state;
+  reg [2:0]pixel_RGB;
+  reg color_done;
+    
+  always @ (posedge clk) begin
+    if(rst)begin
+      state=BEGIN;
+      {black,blue,green,cyan,red,violet,yellow,white}<=120'b0;
+      color_code<=color_code; // default frame color is white 
+      pixel_RGB<=3'b111; // default pixel color is white 
+		color_done=0;
+		regwrite=0;
+		RAM_data=15'b0;
+    end
+    else
+      begin
+        case(state)
+		    BEGIN:
+			   begin
+				  state=READ_RGB;
+              {black,blue,green,cyan,red,violet,yellow,white}<=120'b0;
+              color_code<=color_code; // default frame color is white 
+              pixel_RGB<=3'b111; // default pixel color is white 
+		        color_done=0;
+				  regwrite=0;
+				  RAM_data=15'b0;
+			   end
+          READ_RGB:
+            begin
+              if(read_color&(~color_done))
+              begin 
+				  /*
+                if((pixel_data[14])||(pixel_data[13])) pixel_RGB[2]=1'b1;
+                else pixel_RGB[2]=1'b0;
+                if((pixel_data[9])||(pixel_data[8])) pixel_RGB[1]=1'b1;
+                else pixel_RGB[1]=1'b0;
+                if((pixel_data[4])||(pixel_data[3])) pixel_RGB[0]=1'b1;
+                else pixel_RGB[0]=1'b0;
+               */           
+					if(pixel_data[14]) pixel_RGB[2]=1'b1;
+                else pixel_RGB[2]=1'b0;
+                if(pixel_data[9]) pixel_RGB[1]=1'b1;
+                else pixel_RGB[1]=1'b0;
+                if(pixel_data[4]) pixel_RGB[0]=1'b1;
+                else pixel_RGB[0]=1'b0;
+					
+					regwrite=1;      /// VA EN UNO
+					RAM_data=pixel_data;
+					
+                case (pixel_RGB)
+                  BLACK:
+                    begin
+                      if(~(&black)) black<=black+15'd1;
+                    end
+                  BLUE:
+                    begin
+                      if(~(&blue)) blue<=blue+15'd1;
+                    end
+                  GREEN:
+                    begin
+                      if(~(&green)) green<=green+15'd1;
+                    end
+                  CYAN:
+                    begin
+                      if(~(&cyan)) cyan<=cyan+15'd1;
+                    end
+                  RED:
+                    begin
+                      if(~(&red)) red<=red+15'd1;
+                    end
+                  VIOLET:
+                    begin
+                      if(~(&violet)) violet<=violet+15'd1;
+                    end
+                  YELLOW:
+                    begin
+                      if(~(&yellow)) yellow<=yellow+15'd1;
+                    end
+                  default:
+                    begin
+                      if(~(&white)) white<=white+15'd1;
+                    end
+					  endcase
+                  
+					 color_done<=0;
+                state=CHOOSE_COLOR;
+              end 
+              else state=READ_RGB;
+            end
+          CHOOSE_COLOR:
+            begin
+              if((black>blue)&&(black>green)&&(black>cyan)&&(black>red)&&(black>violet)&&(black>yellow)) color_code<=WHITE;
+              else if((blue>green)&&(blue>cyan)&&(blue>red)&&(blue>violet)&&(blue>yellow)) color_code<=VIOLET;
+              else if((green>cyan)&&(green>red)&&(green>violet)&&(green>yellow)) color_code<=RED;
+              else if((cyan>red)&&(cyan>violet)&&(cyan>yellow)) color_code<=GREEN;
+              else if((red>violet)&&(red>yellow)) color_code<=BLUE;
+              else if((violet>yellow)&&(violet>white)) color_code<=YELLOW;
+              else if(yellow>white) color_code<=CYAN;
+              else color_code<=BLACK;
+				  color_done<=1'b1;
+              pixel_RGB<=3'b111;
+				  RAM_data<=RAM_data;
+				  state=WAIT;
+            end
+			 WAIT:
+				begin
+				regwrite=0;      /// NEW
+				  if(~read_color)
+				  begin
+				    color_done<=1'b0;
+					 state<=READ_RGB;
+					 RAM_data<=RAM_data;
+				  end
+				  else state<=WAIT;
+				end
+				default:
+				state=BEGIN;
+		   endcase
+      end
+          
+  end
+          
+endmodule
+
+```
+
+Es de mencionar que el código fué diseñado para obtener el color del frame, sín embargo con ayuda de Diego Figueroa, Ferdy Larrotta y Edwin Medina también el código logró usarse para observar en el computador la imágen que enviaba la cámara con lo cual se pudo verificar la baja calidad de esta y sú sensibilidad a la luz.
+
+Para trabajos futuros con esta cámara se sugiere realizar un estudio de los registros de configuración de la cámara y en especial aquellos que realizan control del color, puesto que talvez con ayuda de esto se logre obtener una mejor imágen, más clara y que permita ver correctamente el exterior.
+
