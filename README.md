@@ -1,7 +1,14 @@
 # Proyecto de la materia Electrónica Digital II: Explorador de un laberinto.
+
+## Johan Higuera (jhiguera@unal.edu.co)
+## Laura Moreno (lamorenoca@unal.edu.co)
+## Ana Espinosa (aespinosaj@unal.edu.co)
+## Daniel Maldonado (dfmaldonadob@unal.edu.co)
+
+
 El proyecto consiste en el diseño de un sistema capaz de recorrer un laberinto, enviar información de su trayectoria a un dispositivo en el cual se puede visualizar, y captar información del color de las paredes de su entorno, que también debe visualizarse junto a la trayectoria.
 
-### Periféricos: sistema de movimiento
+### Nota importante
 Es ímportante mencionar que el módulo de verilog incluído en el proyecto de cámara de quartus, junto con el código de processing usado para ver la imágen en el computador, no fueron realizados por nuestro grupo, encambio sí por nuestros compañeros Diego Figueroa, Ferdy Larrotta y Edwin Medina, en sú proyecto de verilog"ov7670_captureimage".
 
 ## Implementos
