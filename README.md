@@ -278,6 +278,8 @@ Son dispositivos encargados de generar una onda acústica que viaja desde el dis
 
 ![image](https://user-images.githubusercontent.com/42346349/127583296-5b63e354-d69a-4f8a-88c3-2bfdf84ceba7.png)
 
+Figura 7: Imágen del ultrasonido utilizado
+
 Los pines Vcc y GND son los encargados de la alimentación del sensor, que funciona correctamente con 5 voltios, por lo cual pueden ser conectados a la salida de 5 V de la tarjeta Arduino UNO. 
 
 El pin trig es el encargado de activar la señal acústica, y la detección del su eco se hace por medio de la lectura del pin Echo, que permanece prendido desde que se envía la onda acústica hasta que es detectada por el receptor. Suponiendo que la velocidad con la que el explorador se acerca al obstáculo es mucho menor que la velocidad del sonido, lo cual es cierto en nuestro caso, el tiempo en el que la onda tarda en llegar desde el sensor hasta el obstáculo será la mitad del tiempo detectado, y la distancia a la que se encuentra será este tiempo multiplicado por la velocidad del sonido especificada anteriormente.
@@ -344,7 +346,7 @@ Este modulo se encarga de obtener la información de cada pixel. Dado que se esc
 
 ![pixel_catcher](https://user-images.githubusercontent.com/42346349/127759736-659c2da3-d546-43a5-b53f-317a892bdd65.jpeg)
 
-Figra XXXXXXXX: Diagrama de flujo de funcionamiento del módulo píxel catcher
+Figura 8: Diagrama de flujo de funcionamiento del módulo píxel catcher
 
 ```verilog
 module pixel_catcher(
@@ -491,7 +493,7 @@ A continuación se muestra el diagrama de flujo de este módulo y el código de 
 
 ![color_finder](https://user-images.githubusercontent.com/42346349/127759766-b5584411-7fb8-4931-b7e8-15e18124fa94.jpeg)
 
-Figura XXXXXXXXX: Diagrama de flujo del módulo color_finder
+Figura 8: Diagrama de flujo del módulo color_finder
 
 ```verilog
 module color_finder(input [14:0]pixel_data,
