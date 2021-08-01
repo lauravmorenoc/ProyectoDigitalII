@@ -1,6 +1,9 @@
 # Proyecto de la materia Electrónica Digital II: Explorador de un laberinto.
 El proyecto consiste en el diseño de un sistema capaz de recorrer un laberinto, enviar información de su trayectoria a un dispositivo en el cual se puede visualizar, y captar información del color de las paredes de su entorno, que también debe visualizarse junto a la trayectoria.
 
+### Periféricos: sistema de movimiento
+Es ímportante mencionar que el módulo de verilog incluído en el proyecto de cámara de quartus, junto con el código de processing usado para ver la imágen en el computador, no fueron realizados por nuestro grupo, encambio sí por nuestros compañeros Diego Figueroa, Ferdy Larrotta y Edwin Medina, en sú proyecto de verilog"ov7670_captureimage".
+
 ## Implementos
 Para la realización de este proyecto se usaron los siguientes implementos:
 - Tarjeta Arduino UNO
@@ -92,6 +95,7 @@ int Accionar_motores (bool accionar, double magnitud, double Car_distance_X, dou
 - Giro
 
 Es el encargado de enviar el comando de giro a las ruedas. Para ello toma la variable dirección y a partir de ella asigna el sentido de giro de cada rueda para lograr la acción de giro deseada. Si la dirección de movimiento es positiva, se pretende girar en sentido de las manecillas del reloj y para ello la llanta izquierda deberá avanzar adelante y la llanta derecha deberá ir hacia atrás. Si la dirección es negativa, las llantas y el giro se orientarán de manera contraria a la mencionada anteriormente. A continuación, se muestra el diagrama de bloques y el código fuente del módulo.
+![Giro](https://user-images.githubusercontent.com/32202871/127775892-5adb3817-2b8d-45e9-ba94-ead2e777abe0.jpeg)
 
 Figura 2:  Diagrama de flujo de la función Giro
 
@@ -124,7 +128,8 @@ void Giro(bool direccion){
 
 Genera el llamado a los módulos de las ruedas para el avance dependiendo de la dirección de este. Si la dirección es positiva, se realiza una asignación de avance a ambas ruedas, y si la dirección es negativa, se genera una asignación de retroceso.
 
-![DiagramaJohan(1)](https://user-images.githubusercontent.com/42346349/127759420-d80c814e-39df-4e4d-a795-8b12b2341645.jpeg)
+![Avance](https://user-images.githubusercontent.com/32202871/127775910-d673da84-3564-4f49-99d8-c228b977dee2.jpeg)
+
 
 Figura 3: Diagrama de flujo de la función Avance
 
@@ -157,8 +162,8 @@ void Avance(bool direccion){
 - Motor_Derecha
 
 Este módulo es el encargado final de asignar los pulsos PWM al motor de la llanta derecha.
+![Motor_derecha](https://user-images.githubusercontent.com/32202871/127775885-91d3e85c-0cbf-4faa-95e6-41d9839c2fe5.jpeg)
 
-![DiagramaJohan(2)](https://user-images.githubusercontent.com/42346349/127759425-7f002fc8-5584-4f66-a802-be8492b84133.jpeg)
 
 Figura 4: Diagrama de flujo de la función Motor_Derecha
 
@@ -181,6 +186,7 @@ void Motor_Derecha(int PWM_Motor_1_Adel, int PWM_Motor_1_Atras, bool Detener) {
 - Motor_Izquierda
 
 Este módulo tiene una similitud alta con el módulo anterior, asignando al motor izquierdo la tasa de PWM que debe tener para el movimiento correcto según la dirección que ha sido ordenado por algún módulo de mayor jerarquía.
+![Motor_izquierda](https://user-images.githubusercontent.com/32202871/127775879-f2736798-1af1-4583-86ca-71d3c3f5da5e.jpeg)
 
 Figura 5: Diagrama de flujo de la función Motor_Izquierda
 
@@ -594,8 +600,12 @@ Para trabajos futuros con esta cámara se sugiere realizar un estudio de los reg
 
 ### Periféricos: sistema de mapeo y envío
 De otro lado también se contruyó una App en Appinventor, que a través de datos obtenidos por bluetooth lograba dibujar la trayectoria del explorador, para ello contaba principalmente con tres "módulos" bien definidos, uno que realizaba la obtención de datos en la App (Cómo dato curioso, AppInventor solo tomaba el dato correctamente sí se obtenía cómo texto, No cómo nnúmero de 1, 2 o 4 bits, para pasar dicho texto a número para usarlo luego, se dividió la variable de texto entre 1 y se asignó a una variable numérica), otro decodificaba esta información (Para enviar datos se usó un byte en el cual se codificaba la información de una manera específica, para ver más, observar el punto 5 de la documentación) y finalmente un módulo que tomaba los datos decodificados, y realizaba el dibujo de la trayectoria del robot. A continuación se muestra un diagrama sencillo del funcionamiento de la App.
+![Diagrama App](https://user-images.githubusercontent.com/32202871/127775609-1aa96a6e-d1e0-43e0-aa4d-99fd055b89cf.jpeg)
 
 XXXXXXX Diagrama de funcionamiento de la App
 
 ## Unión de sistemas y resultado final
 Posteior a la realización de cada uno de los sistemas se procedió a realizar la integración de estos, dentro del Soc está el sistema de la cámara y el de movimiento, estos 2 sistemas se comunican por medio de las señales arduinoSignal (Señal que indica a la FPGA el momento en el cual el sistema de movimiento requiere el color del frame) y datoAPP (Señal a través de la cual la FPGA, por protocolo UART envía la información del frame detectado, color y "figura") y, el SoC se comunica con un sistema externo, el de Mapeo y envío, envío, nuestro SoC se comunica con este sistema a parir de la señal datoAPP, que es enviada por el sistema de movimiento a partir de protocolo UART por bluetooth, donde el sistema de mapeo y envío obtiene el dato enviado y realiza el dibujo de la trayectoria del explorador. A continuación puede verse un diagrama general de todos los sistemas de nuestro explorador, junto con los periféricos con los cuales cuenta.
+![Union de sistemas](https://user-images.githubusercontent.com/32202871/127775644-5457d461-97a0-4da4-af2c-e7cc8eab0e04.jpeg)
+
+XXXXXXX Diagrama de funcionamiento del explorador, unión de los sistemas en el SoC
