@@ -1,15 +1,13 @@
 # Proyecto de la materia Electrónica Digital II: Explorador de un laberinto.
 
-### Johan Higuera (jhiguera@unal.edu.co)
-### Laura Moreno (lamorenoca@unal.edu.co)
-### Ana Espinosa (aespinosaj@unal.edu.co)
-### Daniel Maldonado (dfmaldonadob@unal.edu.co)
+## Integrantes
+Johan Higuera (jhiguera@unal.edu.co)
+Laura Moreno (lamorenoca@unal.edu.co)
+Ana Espinosa (aespinosaj@unal.edu.co)
+Daniel Maldonado (dfmaldonadob@unal.edu.co)
 
 
 El proyecto consiste en el diseño de un sistema capaz de recorrer un laberinto, enviar información de su trayectoria a un dispositivo en el cual se puede visualizar, y captar información del color de las paredes de su entorno, que también debe visualizarse junto a la trayectoria.
-
-### Nota importante
-Es ímportante mencionar que el módulo de verilog incluído en el proyecto de cámara de quartus, junto con el código de processing usado para ver la imágen en el computador, no fueron realizados por nuestro grupo, encambio sí por nuestros compañeros Diego Figueroa, Ferdy Larrotta y Edwin Medina, en sú proyecto de verilog"ov7670_captureimage".
 
 ## Implementos
 Para la realización de este proyecto se usaron los siguientes implementos:
@@ -26,6 +24,7 @@ Para la realización de este proyecto se usaron los siguientes implementos:
 
 ## Particionamiento
 El proyecto se separó en tres sub-sistemas "independientes" entre sí, distribuidos entre el hardware (FPGA) y el software de propósito general (Arduino) de la siguiente manera:
+
 - Software: El Arduino UNO será el encargado de realizar todos los procesos relacionados con el sistema del movimiento y, además, se encargará de la transmisión de la información del recorrido para ser visualizada en un ordenador. A continuación se presentan los periféricos a su cargo y su función en el explorador.
   * Motores: Dos motorreductores a cada lado de la base del vehículo que servirán para movilizarlo. Estos motores contarán con alimentación externa (la tarjeta Arduino UNO puede no tener la suficiente potencia para accionarlos).
   * Encoders Ópticos: Dos encoders ópticos que obtendrán la información de posición angular de cada una de las llantas, con lo cual se puede realizar una correcta odometría del robot.
@@ -632,7 +631,8 @@ endmodule
 
 ```
 
-Es de mencionar que el código fué diseñado para obtener el color del frame, sín embargo con ayuda de Diego Figueroa, Ferdy Larrotta y Edwin Medina también el código logró usarse para observar en el computador la imágen que enviaba la cámara con lo cual se pudo verificar la baja calidad de esta y sú sensibilidad a la luz.
+### Nota importante
+Es ímportante mencionar que el módulo de verilog image_sender, incluído en el proyecto de cámara de quartus, junto con el código de processing usado para ver la imágen en el computador, no fueron realizados por nuestro grupo, sino por nuestros colegas Diego Figueroa, Ferdy Larrotta y Edwin Medina, en sú proyecto de verilog"ov7670_captureimage". Mediante esto se pudo verificar la baja calidad de la cámara y su sensibilidad a la luz.
 
 Para trabajos futuros con esta cámara se sugiere realizar un estudio de los registros de configuración de la cámara y en especial aquellos que realizan control del color, puesto que talvez con ayuda de esto se logre obtener una mejor imágen, más clara y que permita ver correctamente el exterior.
 
