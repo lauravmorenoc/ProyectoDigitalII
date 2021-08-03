@@ -1,0 +1,14 @@
+Analysis & Synthesis Status : Successful - Sun Aug 01 18:37:23 2021
+Quartus Prime Version : 20.1.1 Build 720 11/11/2020 SJ Lite Edition
+Revision Name : Camara_mix
+Top-level Entity Name : main
+Family : Cyclone IV E
+Total logic elements : 1,259
+    Total combinational functions : 1,256
+    Dedicated logic registers : 250
+Total registers : 250
+Total pins : 20
+Total virtual pins : 0
+Total memory bits : 24,576
+Embedded Multiplier 9-bit elements : 0
+Total PLLs : 0

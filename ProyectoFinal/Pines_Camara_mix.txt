@@ -1,0 +1,27 @@
+
+set_location_assignment	PIN_23	-to	clk
+set_location_assignment	PIN_125	-to	reset
+
+set_location_assignment	PIN_58	-to	vsync
+set_location_assignment	PIN_54	-to	href
+set_location_assignment	PIN_52	-to	pclk
+
+set_location_assignment	PIN_46	-to   camera_data[7]
+set_location_assignment	PIN_43	-to   camera_data[6]
+set_location_assignment	PIN_39	-to   camera_data[5]
+set_location_assignment	PIN_34	-to   camera_data[4]
+set_location_assignment	PIN_32	-to   camera_data[3]
+set_location_assignment	PIN_30	-to   camera_data[2]
+set_location_assignment	PIN_55	-to   camera_data[1]
+set_location_assignment	PIN_53	-to   camera_data[0]
+
+set_location_assignment	PIN_31	-to   Tx_data
+
+set_location_assignment	PIN_50	-to	xclk
+
+set_location_assignment	PIN_28	-to   color_code[2]
+set_location_assignment	PIN_11	-to   color_code[1]
+set_location_assignment	PIN_10	-to   color_code[0]
+
+set_location_assignment	PIN_7	-to   arduinoSignal
+set_location_assignment	PIN_3	-to   arduino_output

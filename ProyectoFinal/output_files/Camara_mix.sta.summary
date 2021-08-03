@@ -1,0 +1,77 @@
+------------------------------------------------------------
+Timing Analyzer Summary
+------------------------------------------------------------
+
+Type  : Slow 1200mV 85C Model Setup 'clk'
+Slack : -6.433
+TNS   : -880.068
+
+Type  : Slow 1200mV 85C Model Setup 'pclk_driver:driver|pclk_out'
+Slack : -1.980
+TNS   : -31.507
+
+Type  : Slow 1200mV 85C Model Hold 'clk'
+Slack : 0.379
+TNS   : 0.000
+
+Type  : Slow 1200mV 85C Model Hold 'pclk_driver:driver|pclk_out'
+Slack : 0.435
+TNS   : 0.000
+
+Type  : Slow 1200mV 85C Model Minimum Pulse Width 'clk'
+Slack : -3.201
+TNS   : -374.500
+
+Type  : Slow 1200mV 85C Model Minimum Pulse Width 'pclk_driver:driver|pclk_out'
+Slack : -1.487
+TNS   : -38.662
+
+Type  : Slow 1200mV 0C Model Setup 'clk'
+Slack : -5.874
+TNS   : -800.176
+
+Type  : Slow 1200mV 0C Model Setup 'pclk_driver:driver|pclk_out'
+Slack : -1.799
+TNS   : -27.809
+
+Type  : Slow 1200mV 0C Model Hold 'clk'
+Slack : 0.357
+TNS   : 0.000
+
+Type  : Slow 1200mV 0C Model Hold 'pclk_driver:driver|pclk_out'
+Slack : 0.384
+TNS   : 0.000
+
+Type  : Slow 1200mV 0C Model Minimum Pulse Width 'clk'
+Slack : -3.201
+TNS   : -374.500
+
+Type  : Slow 1200mV 0C Model Minimum Pulse Width 'pclk_driver:driver|pclk_out'
+Slack : -1.487
+TNS   : -38.662
+
+Type  : Fast 1200mV 0C Model Setup 'clk'
+Slack : -2.311
+TNS   : -267.882
+
+Type  : Fast 1200mV 0C Model Setup 'pclk_driver:driver|pclk_out'
+Slack : -0.267
+TNS   : -1.464
+
+Type  : Fast 1200mV 0C Model Hold 'clk'
+Slack : 0.117
+TNS   : 0.000
+
+Type  : Fast 1200mV 0C Model Hold 'pclk_driver:driver|pclk_out'
+Slack : 0.178
+TNS   : 0.000
+
+Type  : Fast 1200mV 0C Model Minimum Pulse Width 'clk'
+Slack : -3.000
+TNS   : -257.590
+
+Type  : Fast 1200mV 0C Model Minimum Pulse Width 'pclk_driver:driver|pclk_out'
+Slack : -1.000
+TNS   : -26.000
+
+------------------------------------------------------------
