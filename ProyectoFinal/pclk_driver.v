@@ -1,4 +1,4 @@
-
+//Este código es propiedad y fué realizado por nuestros compañeros Diego Figueroa, Ferdy Larrotta y Edwin Medina en sú proyecto "ov7670_captureimage"
 module pclk_driver (
   input rst,pclk_in,clk,
   output reg pclk_out);
