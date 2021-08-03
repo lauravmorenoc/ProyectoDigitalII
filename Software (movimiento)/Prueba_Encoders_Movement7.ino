@@ -1,3 +1,4 @@
+//Este código fué realizado por Johan Higuera, Laura Moreno y Ana Espinosa
 #include <SoftwareSerial.h>
 SoftwareSerial BT1(A1,A0); // RX, TX recordar que se cruzan
 
