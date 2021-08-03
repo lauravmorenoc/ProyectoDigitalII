@@ -1,3 +1,4 @@
+//Este código es propiedad y fué realizado por nuestros compañeros Diego Figueroa, Ferdy Larrotta y Edwin Medina en sú proyecto "ov7670_captureimage"
 module image_sender (
   input clk,rst,begin_frame,image_select,
   input [2:0] pixel_data, //[5:0] pixel_data //change
