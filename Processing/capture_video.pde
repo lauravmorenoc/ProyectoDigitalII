@@ -1,3 +1,5 @@
+//Este código es propiedad y fué realizado por nuestros compañeros Diego Figueroa, Ferdy Larrotta y Edwin Medina en sú proyecto "ov7670_captureimage"
+
 import processing.serial.*;
 
 Serial myPort;    // The serial port
