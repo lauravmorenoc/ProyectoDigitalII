@@ -1,4 +1,5 @@
 //Este código fué realizado por Johan Higuera, Laura Moreno y Ana Espinosa
+//Las conexiones necesarias para que este código funcione se encuentran en la documentacion y el archivo README
 #include <SoftwareSerial.h>
 SoftwareSerial BT1(A1,A0); // RX, TX recordar que se cruzan
 
