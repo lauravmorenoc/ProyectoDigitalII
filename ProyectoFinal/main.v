@@ -1,3 +1,5 @@
+//Este código fué realizado por Laura Moreno, Johan Higuera y Ana Espinosa
+
 module main(input [7:0]camera_data, 
 input pclk, href, vsync, clk, reset, arduinoSignal,
 output [2:0]color_code,
